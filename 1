@@ -1,0 +1,51 @@
+#include <vector>
+#include <string>
+
+// 单段报价：出力/负荷(MW) 和 报价(元/MWh)
+struct BidSegment {
+    double power;   // 出力或负荷
+    double price;   // 报价
+};
+
+// 发电侧申报：每个时段的申报含多段（段数≤10）
+struct GeneratorBid {
+    std::string plantName;          // 电厂名称
+    std::string unitId;             // 机组编号
+    // 96个时段，每个时段是一个段序列（段数可不同，但均≤10）
+    std::vector<std::vector<BidSegment>> hourlySegments; // 大小应为96
+};
+
+// 用户侧申报：每个时段的申报含多段（段数≤10）
+struct UserBid {
+    std::string userName;           // 用户名称
+    std::string userId;             // 用户编号
+    // 96个时段，每个时段是一个段序列（段数可不同，但均≤10）
+    std::vector<std::vector<BidSegment>> hourlySegments; // 大小应为96
+};
+
+// 单时段出清结果
+struct ClearingResult {
+    double MCP;                     // 统一出清电价 (元/MWh)
+    // 各机组成交信息
+    struct GeneratorClear {
+        std::string unitId;
+        double clearedPower;        // 成交出力 (MW)
+        double revenue;             // 收入 (元)
+    };
+    std::vector<GeneratorClear> generatorClears;
+
+    // 各用户成交信息
+    struct UserClear {
+        std::string userId;
+        double clearedLoad;         // 成交负荷 (MW)
+        double bill;                // 账单 (元)
+    };
+    std::vector<UserClear> userClears;
+};
+
+// 系统数据：保存全部申报和全部时段出清结果
+struct SystemData {
+    std::vector<GeneratorBid> generatorBids;   // 所有发电申报
+    std::vector<UserBid> userBids;             // 所有用户申报
+    std::vector<ClearingResult> clearingResults; // 96个时段的结果，大小应为96
+};
